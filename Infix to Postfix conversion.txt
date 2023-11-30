@@ -1,0 +1,104 @@
+// Infix to Postfix conversion
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define max 100
+
+
+char stack[max], infix[max], postfix[max];
+int top = -1;
+
+
+void push(char x)
+{
+    if(top==max)
+    {
+        printf("\n Stack is full");   
+    }
+    else
+    {
+        stack[++top] = x;
+    }
+}
+
+
+char pop()
+{
+    if(top == -1)
+    {
+        printf("\n Stack is empty");
+    }
+    else
+    {
+        char val = stack[top];
+        top--;
+        return val;
+    }
+}
+
+
+int precedence(char a)
+{
+    if(a=='^' || a=='%')
+        return 3;
+    else if(a=='*' || a=='/')
+        return 2;
+    else if(a=='+' || a=='-')
+        return 1;
+    else
+        return 0;
+}
+
+
+void inToPost(char* infix)
+{
+    printf("\n");
+    int i;
+    char symbol, temp;
+    for(i=0; i<strlen(infix); i++)
+    {
+        symbol = infix[i];
+        switch(symbol)
+        {
+            case '(':
+            push(symbol);
+            break;
+            
+            case '+':
+            case '-':
+            case '*':
+            case '/':
+            case '%':
+            case '^':
+            while(precedence(symbol) <= precedence(stack[top]))
+            {
+                temp = pop();
+                printf("%c",temp);
+            }
+            push(symbol);
+            break;
+            
+            case ')':
+            while((stack[top]) != '(')
+            {
+                temp = pop();
+                printf("%c",temp);
+            }
+            break;
+            
+            default: printf("%c",symbol);
+        }
+    }
+}
+
+
+void main()
+{
+    printf("\n Enter an algebraic expression without spaces: ");
+    scanf("%s",infix);
+    inToPost(infix);
+}
+
+
