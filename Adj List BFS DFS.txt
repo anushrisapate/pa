@@ -1,0 +1,116 @@
+//Adj List BFS DFS
+#include <stdio.h>
+#include <stdlib.h>
+
+
+#define MAX_NODES 100
+
+
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+
+struct Node* adjList[MAX_NODES];
+int visited[MAX_NODES];
+
+
+void addEdge(int src, int dest) {
+    struct Node* newNode = (struct Node*) malloc(sizeof(struct Node));
+    newNode->data = dest;
+    newNode->next = adjList[src];
+    adjList[src] = newNode;
+}
+
+
+void bfs(int start) {
+    int queue[MAX_NODES], front = 0, rear = 0;
+    int curr;
+    struct Node* temp;
+    
+    // Enqueue the start node and mark it as visited
+    queue[rear++] = start;
+    visited[start] = 1;
+    
+    while (front != rear) {
+        // Dequeue the next node in the queue
+        curr = queue[front++];
+        printf("%d ", curr);
+        
+        // Add all unvisited neighbors to the queue
+        for (temp = adjList[curr]; temp != NULL; temp = temp->next) {
+            if (!visited[temp->data]) {
+                queue[rear++] = temp->data;
+                visited[temp->data] = 1;
+            }
+        }
+    }
+}
+
+
+void dfs(int start) {
+    int stack[MAX_NODES], top = -1;
+    int curr, i;
+    struct Node* temp;
+    
+    // Push the start node onto the stack and mark it as visited
+    stack[++top] = start;
+    visited[start] = 1;
+    
+    while (top != -1) {
+        // Pop the next node off the stack
+        curr = stack[top--];
+        printf("%d ", curr);
+        
+        // Push all unvisited neighbors onto the stack
+        for (temp = adjList[curr]; temp != NULL; temp = temp->next) {
+            if (!visited[temp->data]) {
+                stack[++top] = temp->data;
+                visited[temp->data] = 1;
+            }
+        }
+    }
+}
+
+
+int main() {
+    int n, i, j, start, src, dest, edges;
+    struct Node* temp;
+    
+    printf("Enter the number of nodes: ");
+    scanf("%d", &n);
+    
+    printf("Enter the number of edges: ");
+    scanf("%d", &edges);
+    
+    for (i = 0; i < n; i++) {
+        adjList[i] = NULL;
+    }
+    
+    printf("Enter the edges (src dest):\n");
+    for (i = 0; i < edges; i++) {
+        scanf("%d %d", &src, &dest);
+        addEdge(src, dest);
+        addEdge(dest, src);
+    }
+    
+    printf("Enter the starting node: ");
+    scanf("%d", &start);
+    
+    printf("BFS traversal: ");
+    bfs(start);
+    printf("\n");
+    
+    for (i = 0; i < n; i++) {
+        visited[i] = 0;
+    }
+    
+    printf("DFS traversal: ");
+    dfs(start);
+    printf("\n");
+    
+    return 0;
+}
+
+
