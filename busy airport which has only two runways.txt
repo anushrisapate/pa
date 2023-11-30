@@ -1,0 +1,152 @@
+Write a program which simulates the operation
+of a busy airport which has only two runways to handle
+all takeoffs and landings. You may assume that each
+takeoff or landing takes 15 minutes to complete. One
+runway request is made during each five minute time
+interval and likelihood of landing request is the same as
+for takeoff. Priority is given to planes requesting a
+landing. If a request cannot be honored it is added to a
+takeoff or landing queue. Your program should simulate
+120 minutes of activity at the airport. Each request for
+runway clearance should be time-stamped and added to
+the appropriate queue. The output from your program
+should include the final queue contents, the number of
+take offs completed, the number of landings completed,
+and the average number of minutes spent in each queue.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SIMULATION_TIME 120
+#define TAKEOFF_TIME 15
+#define LANDING_TIME 15
+#define REQUEST_INTERVAL 5
+
+// Structure to represent a runway request
+struct RunwayRequest {
+    int timestamp;
+    int type; // 0 for takeoff, 1 for landing
+};
+
+// Structure to represent a queue
+struct Queue {
+    struct RunwayRequest* array;
+    int capacity;
+    int front;
+    int rear;
+    int size;
+};
+
+// Function to create a new runway request
+struct RunwayRequest createRunwayRequest(int timestamp, int type) {
+    struct RunwayRequest request;
+    request.timestamp = timestamp;
+    request.type = type;
+    return request;
+}
+
+// Function to create a new queue
+struct Queue createQueue(int capacity) {
+    struct Queue q;
+    q.capacity = capacity;
+    q.front = 0;
+    q.rear = -1;
+    q.size = 0;
+    q.array = (struct RunwayRequest*)malloc(capacity * sizeof(struct RunwayRequest));
+    return q;
+}
+
+// Function to check if a queue is empty
+int isEmpty(struct Queue* q) {
+    return q->size == 0;
+}
+
+// Function to check if a queue is full
+int isFull(struct Queue* q) {
+    return q->size == q->capacity;
+}
+
+// Function to enqueue a request
+void enqueue(struct Queue* q, struct RunwayRequest request) {
+    if (!isFull(q)) {
+        q->rear = (q->rear + 1) % q->capacity;
+        q->array[q->rear] = request;
+        q->size++;
+    }
+}
+
+// Function to dequeue a request
+struct RunwayRequest dequeue(struct Queue* q) {
+    if (!isEmpty(q)) {
+        struct RunwayRequest request = q->array[q->front];
+        q->front = (q->front + 1) % q->capacity;
+        q->size--;
+        return request;
+    }
+    return createRunwayRequest(-1, -1); // Return a dummy request if the queue is empty
+}
+
+// Function to simulate airport activity
+void simulateAirportActivity() {
+    struct Queue takeoffQueue = createQueue(SIMULATION_TIME / REQUEST_INTERVAL);
+    struct Queue landingQueue = createQueue(SIMULATION_TIME / REQUEST_INTERVAL);
+
+    int currentTime = 0;
+    int takeoffsCompleted = 0;
+    int landingsCompleted = 0;
+
+    while (currentTime < SIMULATION_TIME) {
+        // Generate requests every REQUEST_INTERVAL minutes
+        if (currentTime % REQUEST_INTERVAL == 0) {
+            int random = rand() % 2; // 0 for takeoff, 1 for landing
+            struct RunwayRequest request = createRunwayRequest(currentTime, random);
+
+            // Enqueue the request based on type
+            if (random == 0) {
+                enqueue(&takeoffQueue, request);
+            } else {
+                enqueue(&landingQueue, request);
+            }
+        }
+
+        // Handle requests at each time interval
+        if (!isEmpty(&landingQueue)) {
+            struct RunwayRequest landingRequest = dequeue(&landingQueue);
+            printf("Landing Request at time %d\n", landingRequest.timestamp);
+            landingsCompleted++;
+            currentTime += LANDING_TIME;
+        } else if (!isEmpty(&takeoffQueue)) {
+            struct RunwayRequest takeoffRequest = dequeue(&takeoffQueue);
+            printf("Takeoff Request at time %d\n", takeoffRequest.timestamp);
+            takeoffsCompleted++;
+            currentTime += TAKEOFF_TIME;
+        } else {
+            // No requests, time passes
+            currentTime++;
+        }
+    }
+
+    // Display results
+    printf("\nFinal Queue Contents:\n");
+    printf("Takeoff Queue: ");
+    while (!isEmpty(&takeoffQueue)) {
+        struct RunwayRequest takeoffRequest = dequeue(&takeoffQueue);
+        printf("%d ", takeoffRequest.timestamp);
+    }
+    printf("\nLanding Queue: ");
+    while (!isEmpty(&landingQueue)) {
+        struct RunwayRequest landingRequest = dequeue(&landingQueue);
+        printf("%d ", landingRequest.timestamp);
+    }
+
+    printf("\n\nNumber of Takeoffs Completed: %d\n", takeoffsCompleted);
+    printf("Number of Landings Completed: %d\n", landingsCompleted);
+    printf("Average Time in Takeoff Queue: %.2f minutes\n", (float)takeoffsCompleted * TAKEOFF_TIME / takeoffsCompleted);
+    printf("Average Time in Landing Queue: %.2f minutes\n", (float)landingsCompleted * LANDING_TIME / landingsCompleted);
+}
+
+int main() {
+    simulateAirportActivity();
+
+    return 0;
+}
