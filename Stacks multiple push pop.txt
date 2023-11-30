@@ -1,0 +1,155 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_SIZE 10
+
+// Define a structure for two stacks
+struct TwoStacks {
+    int top1; // Top index for stack 1
+    int top2; // Top index for stack 2
+    int* array; // Array to store elements
+};
+
+// Function to create a structure for two stacks
+struct TwoStacks* createTwoStacks() {
+    struct TwoStacks* ts = (struct TwoStacks*)malloc(sizeof(struct TwoStacks));
+    ts->top1 = -1;
+    ts->top2 = MAX_SIZE;
+    ts->array = (int*)malloc(MAX_SIZE * sizeof(int));
+    return ts;
+}
+
+// Function to push an element to stack 1
+void push1(struct TwoStacks* ts, int item) {
+    if (ts->top1 < ts->top2 - 1) {
+        ts->array[++ts->top1] = item;
+        printf("Pushed to Stack 1: %d\n", item);
+    } else {
+        printf("Stack 1 Overflow\n");
+    }
+}
+
+// Function to push an element to stack 2
+void push2(struct TwoStacks* ts, int item) {
+    if (ts->top1 < ts->top2 - 1) {
+        ts->array[--ts->top2] = item;
+        printf("Pushed to Stack 2: %d\n", item);
+    } else {
+        printf("Stack 2 Overflow\n");
+    }
+}
+
+// Function to pop an element from stack 1
+int pop1(struct TwoStacks* ts) {
+    if (ts->top1 >= 0) {
+        int item = ts->array[ts->top1--];
+        printf("Popped from Stack 1: %d\n", item);
+        return item;
+    } else {
+        printf("Stack 1 Underflow\n");
+        return -1; // Return a special value indicating underflow
+    }
+}
+
+// Function to pop an element from stack 2
+int pop2(struct TwoStacks* ts) {
+    if (ts->top2 < MAX_SIZE) {
+        int item = ts->array[ts->top2++];
+        printf("Popped from Stack 2: %d\n", item);
+        return item;
+    } else {
+        printf("Stack 2 Underflow\n");
+        return -1; // Return a special value indicating underflow
+    }
+}
+
+// Function to check if stack 1 is full
+int isStack1Full(struct TwoStacks* ts) {
+    return ts->top1 == ts->top2 - 1;
+}
+
+// Function to check if stack 2 is full
+int isStack2Full(struct TwoStacks* ts) {
+    return ts->top2 == ts->top1 + 1;
+}
+
+// Function to check if stack 1 is empty
+int isStack1Empty(struct TwoStacks* ts) {
+    return ts->top1 == -1;
+}
+
+// Function to check if stack 2 is empty
+int isStack2Empty(struct TwoStacks* ts) {
+    return ts->top2 == MAX_SIZE;
+}
+
+// Function to display the contents of stack 1
+void displayStack1(struct TwoStacks* ts) {
+    printf("Stack 1: ");
+    for (int i = 0; i <= ts->top1; ++i) {
+        printf("%d ", ts->array[i]);
+    }
+    printf("\n");
+}
+
+// Function to display the contents of stack 2
+void displayStack2(struct TwoStacks* ts) {
+    printf("Stack 2: ");
+    for (int i = MAX_SIZE - 1; i >= ts->top2; --i) {
+        printf("%d ", ts->array[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    struct TwoStacks* ts = createTwoStacks();
+    int choice, item;
+
+    do {
+        printf("\n1. Push to Stack 1\n");
+        printf("2. Push to Stack 2\n");
+        printf("3. Pop from Stack 1\n");
+        printf("4. Pop from Stack 2\n");
+        printf("5. Display Stack 1\n");
+        printf("6. Display Stack 2\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter element to push to Stack 1: ");
+                scanf("%d", &item);
+                push1(ts, item);
+                break;
+            case 2:
+                printf("Enter element to push to Stack 2: ");
+                scanf("%d", &item);
+                push2(ts, item);
+                break;
+            case 3:
+                pop1(ts);
+                break;
+            case 4:
+                pop2(ts);
+                break;
+            case 5:
+                displayStack1(ts);
+                break;
+            case 6:
+                displayStack2(ts);
+                break;
+            case 7:
+                printf("Exiting program\n");
+                break;
+            default:
+                printf("Invalid choice\n");
+        }
+    } while (choice != 7);
+
+    // Clean up and free memory
+    free(ts->array);
+    free(ts);
+
+    return 0;
+}
