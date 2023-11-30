@@ -1,0 +1,151 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_SIZE 10
+
+struct MultipleQueue {
+    int front1, rear1;
+    int front2, rear2;
+    int array[MAX_SIZE];
+};
+
+// Function to initialize the multiple queue
+void initializeQueue(struct MultipleQueue* mq) {
+    mq->front1 = -1;
+    mq->rear1 = -1;
+    mq->front2 = MAX_SIZE;
+    mq->rear2 = MAX_SIZE;
+}
+
+// Function to add an element to Queue 1
+void addq1(struct MultipleQueue* mq, int item) {
+    if (mq->rear1 < mq->front2 - 1) {
+        mq->array[++mq->rear1] = item;
+        if (mq->front1 == -1) {
+            mq->front1 = 0;
+        }
+        printf("Added to Queue 1: %d\n", item);
+    } else {
+        printf("Queue 1 Overflow\n");
+    }
+}
+
+// Function to add an element to Queue 2
+void addq2(struct MultipleQueue* mq, int item) {
+    if (mq->rear2 > mq->front1 + 1) {
+        mq->array[--mq->rear2] = item;
+        if (mq->front2 == MAX_SIZE) {
+            mq->front2 = MAX_SIZE - 1;
+        }
+        printf("Added to Queue 2: %d\n", item);
+    } else {
+        printf("Queue 2 Overflow\n");
+    }
+}
+
+// Function to delete an element from Queue 1
+int delq1(struct MultipleQueue* mq) {
+    if (mq->front1 <= mq->rear1) {
+        int item = mq->array[mq->front1++];
+        printf("Deleted from Queue 1: %d\n", item);
+        if (mq->front1 > mq->rear1) {
+            mq->front1 = mq->rear1 = -1;
+        }
+        return item;
+    } else {
+        printf("Queue 1 Underflow\n");
+        return -1; // Return a special value indicating underflow
+    }
+}
+
+// Function to delete an element from Queue 2
+int delq2(struct MultipleQueue* mq) {
+    if (mq->front2 >= mq->rear2) {
+        int item = mq->array[mq->front2--];
+        printf("Deleted from Queue 2: %d\n", item);
+        if (mq->front2 < mq->rear2) {
+            mq->front2 = mq->rear2 = MAX_SIZE;
+        }
+        return item;
+    } else {
+        printf("Queue 2 Underflow\n");
+        return -1; // Return a special value indicating underflow
+    }
+}
+
+// Function to display Queue 1
+void displayQueue1(struct MultipleQueue* mq) {
+    if (mq->front1 <= mq->rear1) {
+        printf("Queue 1: ");
+        for (int i = mq->front1; i <= mq->rear1; ++i) {
+            printf("%d ", mq->array[i]);
+        }
+        printf("\n");
+    } else {
+        printf("Queue 1 is empty\n");
+    }
+}
+
+// Function to display Queue 2
+void displayQueue2(struct MultipleQueue* mq) {
+    if (mq->front2 >= mq->rear2) {
+        printf("Queue 2: ");
+        for (int i = mq->front2; i >= mq->rear2; --i) {
+            printf("%d ", mq->array[i]);
+        }
+        printf("\n");
+    } else {
+        printf("Queue 2 is empty\n");
+    }
+}
+
+int main() {
+    struct MultipleQueue mq;
+    initializeQueue(&mq);
+
+    int choice, item;
+
+    do {
+        printf("\n1. Add to Queue 1\n");
+        printf("2. Add to Queue 2\n");
+        printf("3. Delete from Queue 1\n");
+        printf("4. Delete from Queue 2\n");
+        printf("5. Display Queue 1\n");
+        printf("6. Display Queue 2\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter element to add to Queue 1: ");
+                scanf("%d", &item);
+                addq1(&mq, item);
+                break;
+            case 2:
+                printf("Enter element to add to Queue 2: ");
+                scanf("%d", &item);
+                addq2(&mq, item);
+                break;
+            case 3:
+                delq1(&mq);
+                break;
+            case 4:
+                delq2(&mq);
+                break;
+            case 5:
+                displayQueue1(&mq);
+                break;
+            case 6:
+                displayQueue2(&mq);
+                break;
+            case 7:
+                printf("Exiting program\n");
+                break;
+            default:
+                printf("Invalid choice\n");
+        }
+    } while (choice != 7);
+
+    return 0;
+}
