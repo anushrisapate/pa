@@ -1,0 +1,145 @@
+//Dijkstra using adj matrix
+//WriteaProgramtoimplementDijkstra’ salgorithmtofindshortest
+//distancebetweentwonodesofauserdefinedgraph.UseAdjacencyMatrixto
+//representagraph
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+// Function prototypes
+void dijkstra(int** graph, int V, int src, int dest);
+
+int main() {
+    int V, E;
+
+    // Get the number of vertices and edges from the user
+    printf("Enter the number of vertices: ");
+    scanf("%d", &V);
+
+    // Allocate memory for the adjacency matrix
+    int** graph = (int**)malloc(V * sizeof(int*));
+    for (int i = 0; i < V; i++) {
+        graph[i] = (int*)malloc(V * sizeof(int));
+        for (int j = 0; j < V; j++) {
+            graph[i][j] = 0; // Initialize the matrix with zeros
+        }
+    }
+
+    // Get edge details from the user
+    printf("Enter the number of edges: ");
+    scanf("%d", &E);
+
+    for (int i = 0; i < E; ++i) {
+        int src, dest, weight;
+        printf("Enter edge %d (source destination weight): ", i + 1);
+        scanf("%d %d %d", &src, &dest, &weight);
+        graph[src][dest] = weight; // Directed graph
+    }
+
+    int src, dest;
+
+    // Get source and destination nodes from the user
+    printf("Enter the source node: ");
+    scanf("%d", &src);
+
+    printf("Enter the destination node: ");
+    scanf("%d", &dest);
+
+    // Apply Dijkstra's algorithm
+    dijkstra(graph, V, src, dest);
+
+    // Free allocated memory
+    for (int i = 0; i < V; i++) {
+        free(graph[i]);
+    }
+    free(graph);
+
+    return 0;
+}
+
+// Function to find the vertex with the minimum distance value
+int minDistance(int dist[], int sptSet[], int V) {
+    int min = INT_MAX, min_index;
+
+    for (int v = 0; v < V; v++) {
+        if (sptSet[v] == 0 && dist[v] <= min) {
+            min = dist[v];
+            min_index = v;
+        }
+    }
+
+    return min_index;
+}
+
+// Function to print the shortest path from source to destination
+void printShortestPath(int parent[], int j) {
+    if (parent[j] == -1)
+        return;
+
+    printShortestPath(parent, parent[j]);
+
+    printf("%d ", j);
+}
+
+// Function to print the final solution
+void printSolution(int dist[], int parent[], int src, int dest) {
+    printf("\nShortest Distance from Node %d to Node %d: %d\n", src, dest, dist[dest]);
+
+    printf("\nShortest Path from Node %d to Node %d:\n", src, dest);
+    printf("%d ", src);
+    printShortestPath(parent, dest);
+}
+
+// Function to perform Dijkstra's algorithm
+void dijkstra(int** graph, int V, int src, int dest) {
+    int dist[V];     // The output array dist[i] holds the shortest distance from src to i
+    int sptSet[V];   // sptSet[i] will be 1 if vertex i is included in the shortest path tree or the shortest distance from src to i is finalized
+    int parent[V];   // Parent array to store the shortest path tree
+
+    // Initialize all distances as INFINITE and sptSet[] as 0
+    for (int i = 0; i < V; i++) {
+        dist[i] = INT_MAX;
+        sptSet[i] = 0;
+    }
+
+    // Distance of source vertex from itself is always 0
+    dist[src] = 0;
+    parent[src] = -1;  // Source node has no parent
+
+    // Find the shortest path for all vertices
+    for (int count = 0; count < V - 1; count++) {
+        int u = minDistance(dist, sptSet, V);
+
+        // Mark the picked vertex as processed
+        sptSet[u] = 1;
+
+        // Update dist value of the adjacent vertices of the picked vertex
+        for (int v = 0; v < V; v++) {
+            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX && dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+                parent[v] = u;
+            }
+        }
+    }
+
+    // Print the solution
+    printSolution(dist, parent, src, dest);
+}
+
+
+
+
+Enter the number of vertices: 5
+Enter the number of edges: 8
+Enter edge 1 (source destination weight): 0 1 2
+Enter edge 2 (source destination weight): 0 2 4
+Enter edge 3 (source destination weight): 1 2 1
+Enter edge 4 (source destination weight): 1 3 7
+Enter edge 5 (source destination weight): 2 3 3
+Enter edge 6 (source destination weight): 2 4 5
+Enter edge 7 (source destination weight): 3 4 1
+Enter edge 8 (source destination weight): 4 0 8
+Enter the source node: 0
+Enter the destination node: 3
