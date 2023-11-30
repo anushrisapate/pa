@@ -1,0 +1,132 @@
+//WAPtomergetwosortedDoublylinkedlistsanddisplaytheirresult.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for a doubly linked list
+typedef struct Node {
+    int data;
+    struct Node* prev;
+    struct Node* next;
+} Node;
+
+// Function to create a new node
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to print the doubly linked list
+void printList(Node* head) {
+    Node* current = head;
+    while (current != NULL) {
+        printf("%d ", current->data);
+        current = current->next;
+    }
+    printf("\n");
+}
+
+// Function to insert a node at the end of the doubly linked list
+void insertAtEnd(Node** head, int data) {
+    Node* newNode = createNode(data);
+    if (*head == NULL) {
+        *head = newNode;
+    } else {
+        Node* current = *head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newNode;
+        newNode->prev = current;
+    }
+}
+
+// Function to merge two sorted doubly linked lists
+Node* mergeSortedLists(Node* list1, Node* list2) {
+    Node* mergedList = NULL;
+
+    while (list1 != NULL && list2 != NULL) {
+        if (list1->data < list2->data) {
+            insertAtEnd(&mergedList, list1->data);
+            list1 = list1->next;
+        } else {
+            insertAtEnd(&mergedList, list2->data);
+            list2 = list2->next;
+        }
+    }
+
+    // If any list has remaining elements, add them to the merged list
+    while (list1 != NULL) {
+        insertAtEnd(&mergedList, list1->data);
+        list1 = list1->next;
+    }
+
+    while (list2 != NULL) {
+        insertAtEnd(&mergedList, list2->data);
+        list2 = list2->next;
+    }
+
+    return mergedList;
+}
+
+// Function to free the memory allocated for the doubly linked list
+void freeList(Node* head) {
+    Node* current = head;
+    Node* nextNode;
+
+    while (current != NULL) {
+        nextNode = current->next;
+        free(current);
+        current = nextNode;
+    }
+}
+
+int main() {
+    Node* list1 = NULL;
+    Node* list2 = NULL;
+
+    // Input for the first sorted doubly linked list
+    int n1, data1;
+    printf("Enter the number of nodes in the first sorted list: ");
+    scanf("%d", &n1);
+
+    printf("Enter the elements of the first sorted list in ascending order:\n");
+    for (int i = 0; i < n1; i++) {
+        scanf("%d", &data1);
+        insertAtEnd(&list1, data1);
+    }
+
+    // Input for the second sorted doubly linked list
+    int n2, data2;
+    printf("Enter the number of nodes in the second sorted list: ");
+    scanf("%d", &n2);
+
+    printf("Enter the elements of the second sorted list in ascending order:\n");
+    for (int i = 0; i < n2; i++) {
+        scanf("%d", &data2);
+        insertAtEnd(&list2, data2);
+    }
+
+    printf("\nFirst Sorted List: ");
+    printList(list1);
+
+    printf("Second Sorted List: ");
+    printList(list2);
+
+    // Merge the two sorted lists
+    Node* mergedList = mergeSortedLists(list1, list2);
+
+    printf("\nMerged Sorted List: ");
+    printList(mergedList);
+
+    // Free the memory allocated for the lists
+    freeList(list1);
+    freeList(list2);
+    freeList(mergedList);
+
+    return 0;
+}
