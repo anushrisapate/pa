@@ -1,0 +1,194 @@
+An operating system assigns job to print queues
+based on the number of pages to be printed (1 to 50
+pages). You may assume that the system printers are able
+to print 10 page per minute. Smaller print jobs are printed
+before larger print jobs and print jobs are processed from
+a single print queue implemented as a priority queue).
+The system administrators would like to compare the time
+required to process a set of print jobs using 1, 2, or 3
+system printers. Write a program which simulates
+processing 100 print jobs of varying lengths using either
+1, 2, or 3 printers. Assume that a print request is made
+every minute and that the number of pages to print varies
+from 1 to 50 pages. To be fair, you will need to process
+the same set of print jobs each time you add a printer. The
+output from your program should indicate the order in
+which the jobs were received, the order in which they
+were printed, and the time required to process the set of
+print jobs. If more than one printer is being used, indicate
+which printer each job was printed on.
+(Hint: Can implement job queue using suitable
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_PRINTERS 3
+#define TOTAL_PRINT_JOBS 100
+#define PAGES_PER_MINUTE_PER_PRINTER 10
+
+// Structure to represent a print job
+struct PrintJob {
+    int timestamp;
+    int pages;
+};
+
+// Structure to represent a printer
+struct Printer {
+    int id;
+    int timeRemaining;
+};
+
+// Structure to represent a priority queue for print jobs
+struct PriorityQueue {
+    struct PrintJob* array;
+    int capacity;
+    int size;
+};
+
+// Function to create a new print job
+struct PrintJob createPrintJob(int timestamp, int pages) {
+    struct PrintJob newJob;
+    newJob.timestamp = timestamp;
+    newJob.pages = pages;
+    return newJob;
+}
+
+// Function to create a new printer
+struct Printer createPrinter(int id) {
+    struct Printer newPrinter;
+    newPrinter.id = id;
+    newPrinter.timeRemaining = 0;
+    return newPrinter;
+}
+
+// Function to create a new priority queue
+struct PriorityQueue createPriorityQueue(int capacity) {
+    struct PriorityQueue pq;
+    pq.capacity = capacity;
+    pq.size = 0;
+    pq.array = (struct PrintJob*)malloc(capacity * sizeof(struct PrintJob));
+    return pq;
+}
+
+// Function to check if a priority queue is empty
+int isEmpty(struct PriorityQueue* pq) {
+    return pq->size == 0;
+}
+
+// Function to check if a priority queue is full
+int isFull(struct PriorityQueue* pq) {
+    return pq->size == pq->capacity;
+}
+
+// Function to enqueue a print job into the priority queue
+void enqueue(struct PriorityQueue* pq, struct PrintJob job) {
+    if (!isFull(pq)) {
+        int currentIndex = pq->size;
+        pq->array[currentIndex] = job;
+
+        while (currentIndex > 0 && pq->array[currentIndex].pages > pq->array[(currentIndex - 1) / 2].pages) {
+            // Swap with the parent if the job has more pages
+            struct PrintJob temp = pq->array[currentIndex];
+            pq->array[currentIndex] = pq->array[(currentIndex - 1) / 2];
+            pq->array[(currentIndex - 1) / 2] = temp;
+
+            currentIndex = (currentIndex - 1) / 2;
+        }
+
+        pq->size++;
+    }
+}
+
+// Function to dequeue a print job from the priority queue
+struct PrintJob dequeue(struct PriorityQueue* pq) {
+    if (!isEmpty(pq)) {
+        struct PrintJob job = pq->array[0];
+        pq->array[0] = pq->array[pq->size - 1];
+        pq->size--;
+
+        int currentIndex = 0;
+        while (1) {
+            int leftChild = 2 * currentIndex + 1;
+            int rightChild = 2 * currentIndex + 2;
+
+            if (leftChild >= pq->size) {
+                break;
+            }
+
+            int largerChild = leftChild;
+            if (rightChild < pq->size && pq->array[rightChild].pages > pq->array[leftChild].pages) {
+                largerChild = rightChild;
+            }
+
+            if (pq->array[currentIndex].pages >= pq->array[largerChild].pages) {
+                break;
+            }
+
+            // Swap with the larger child if the job has more pages
+            struct PrintJob temp = pq->array[currentIndex];
+            pq->array[currentIndex] = pq->array[largerChild];
+            pq->array[largerChild] = temp;
+
+            currentIndex = largerChild;
+        }
+
+        return job;
+    }
+
+    return createPrintJob(-1, -1); // Return a dummy print job if the queue is empty
+}
+
+// Function to process print jobs using 1, 2, or 3 printers
+void processPrintJobs(int numPrinters) {
+    struct PriorityQueue jobQueue = createPriorityQueue(TOTAL_PRINT_JOBS);
+    struct Printer printers[MAX_PRINTERS];
+    int currentTime = 0;
+
+    // Initialize printers
+    for (int i = 0; i < MAX_PRINTERS; ++i) {
+        printers[i] = createPrinter(i + 1);
+    }
+
+    // Enqueue 100 print jobs with random pages
+    for (int i = 0; i < TOTAL_PRINT_JOBS; ++i) {
+        int pages = rand() % 50 + 1;
+        enqueue(&jobQueue, createPrintJob(currentTime, pages));
+        currentTime++;
+    }
+
+    printf("Simulating processing of print jobs using %d printer(s):\n", numPrinters);
+
+    // Process print jobs
+    while (!isEmpty(&jobQueue)) {
+        // Check if any printer is available
+        for (int i = 0; i < numPrinters; ++i) {
+            if (printers[i].timeRemaining == 0 && !isEmpty(&jobQueue)) {
+                struct PrintJob job = dequeue(&jobQueue);
+                printf("Received job (Timestamp: %d, Pages: %d)\n", job.timestamp, job.pages);
+                printers[i].timeRemaining = job.pages / PAGES_PER_MINUTE_PER_PRINTER;
+            }
+        }
+
+        // Decrease time remaining for each printer
+        for (int i = 0; i < numPrinters; ++i) {
+            if (printers[i].timeRemaining > 0) {
+                printers[i].timeRemaining--;
+            }
+        }
+
+        currentTime++;
+    }
+
+    printf("\nAll print jobs processed.\n");
+}
+
+int main() {
+    // Simulate processing of print jobs using 1, 2, and 3 printers
+    for (int numPrinters = 1; numPrinters <= MAX_PRINTERS; ++numPrinters) {
+        processPrintJobs(numPrinters);
+        printf("\n");
+    }
+
+    return 0;
+}
