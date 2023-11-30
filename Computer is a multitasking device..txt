@@ -1,0 +1,145 @@
+Write a Program to simulate the following
+situation. Computer is a multitasking device. We need to
+download some document as well as listen music and
+play game simultaneously. There is a system queue which
+decides which task to be done first. Assume that for
+download application priority is highest and game playing
+is having lowest priority. After completion of one type of
+tasks like all download operations then the second queue
+will be processed.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent a task
+struct Task {
+    int priority;
+    char description[50];
+};
+
+// Structure to represent a priority queue
+struct PriorityQueue {
+    struct Task* array;
+    int capacity;
+    int size;
+};
+
+// Function to create a new task
+struct Task createTask(int priority, const char* description) {
+    struct Task newTask;
+    newTask.priority = priority;
+    snprintf(newTask.description, sizeof(newTask.description), "%s", description);
+    return newTask;
+}
+
+// Function to create a new priority queue
+struct PriorityQueue createPriorityQueue(int capacity) {
+    struct PriorityQueue pq;
+    pq.capacity = capacity;
+    pq.size = 0;
+    pq.array = (struct Task*)malloc(capacity * sizeof(struct Task));
+    return pq;
+}
+
+// Function to swap two tasks
+void swap(struct Task* a, struct Task* b) {
+    struct Task temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Function to maintain heap property in the max-heap
+void maxHeapify(struct Task* array, int size, int index) {
+    int largest = index;
+    int left = 2 * index + 1;
+    int right = 2 * index + 2;
+
+    if (left < size && array[left].priority > array[largest].priority) {
+        largest = left;
+    }
+
+    if (right < size && array[right].priority > array[largest].priority) {
+        largest = right;
+    }
+
+    if (largest != index) {
+        swap(&array[index], &array[largest]);
+        maxHeapify(array, size, largest);
+    }
+}
+
+// Function to build a max-heap from an array
+void buildMaxHeap(struct Task* array, int size) {
+    for (int i = size / 2 - 1; i >= 0; i--) {
+        maxHeapify(array, size, i);
+    }
+}
+
+// Function to insert a task into the priority queue
+void enqueue(struct PriorityQueue* pq, struct Task task) {
+    if (pq->size == pq->capacity) {
+        printf("Queue is full. Cannot enqueue.\n");
+        return;
+    }
+
+    pq->array[pq->size] = task;
+    int currentIndex = pq->size;
+
+    while (currentIndex > 0 && pq->array[currentIndex].priority > pq->array[(currentIndex - 1) / 2].priority) {
+        swap(&pq->array[currentIndex], &pq->array[(currentIndex - 1) / 2]);
+        currentIndex = (currentIndex - 1) / 2;
+    }
+
+    pq->size++;
+}
+
+// Function to dequeue a task from the priority queue
+struct Task dequeue(struct PriorityQueue* pq) {
+    if (pq->size == 0) {
+        printf("Queue is empty. Cannot dequeue.\n");
+        return createTask(-1, "Empty");
+    }
+
+    struct Task dequeuedTask = pq->array[0];
+    pq->array[0] = pq->array[pq->size - 1];
+    pq->size--;
+
+    maxHeapify(pq->array, pq->size, 0);
+
+    return dequeuedTask;
+}
+
+// Function to check if the priority queue is empty
+int isEmpty(struct PriorityQueue* pq) {
+    return pq->size == 0;
+}
+
+// Function to simulate multitasking
+void simulateMultitasking(struct PriorityQueue* pq) {
+    printf("Simulating multitasking:\n");
+
+    while (!isEmpty(pq)) {
+        struct Task task = dequeue(pq);
+        printf("Processing task: Priority %d - %s\n", task.priority, task.description);
+    }
+}
+
+int main() {
+    // Create a priority queue
+    struct PriorityQueue pq = createPriorityQueue(10);
+
+    // Enqueue tasks with different priorities
+    enqueue(&pq, createTask(1, "Download Document 1"));
+    enqueue(&pq, createTask(3, "Listen to Music"));
+    enqueue(&pq, createTask(2, "Download Document 2"));
+    enqueue(&pq, createTask(4, "Play Game"));
+    enqueue(&pq, createTask(1, "Download Document 3"));
+
+    // Simulate multitasking
+    simulateMultitasking(&pq);
+
+    // Free memory
+    free(pq.array);
+
+    return 0;
+}
