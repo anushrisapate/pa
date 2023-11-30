@@ -1,0 +1,107 @@
+A person is living in house having 5 rooms. These
+rooms are adjacent to each other. There is a treasure
+which is electronically locked and to unlock it we need a
+code. In last room there is a box in which some decimal
+number is written. We need to convert that number into
+binary to open treasure which is kept in room no.1. We
+need to move from room no.1 to 2 to 3 and so on and
+follow the reverse way to come back i.e. from 5 to 4 to 3
+etc. Apply suitable logic to implement this scenario by
+using stacks.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_ROOMS 5
+
+// Structure to represent a stack
+struct Stack {
+    int top;
+    int* array;
+};
+
+// Function to create a new stack
+struct Stack* createStack(int capacity) {
+    struct Stack* stack = (struct Stack*)malloc(sizeof(struct Stack));
+    stack->top = -1;
+    stack->array = (int*)malloc(capacity * sizeof(int));
+    return stack;
+}
+
+// Function to check if the stack is empty
+int isEmpty(struct Stack* stack) {
+    return stack->top == -1;
+}
+
+// Function to check if the stack is full
+int isFull(struct Stack* stack, int capacity) {
+    return stack->top == capacity - 1;
+}
+
+// Function to push an element onto the stack
+void push(struct Stack* stack, int room) {
+    if (!isFull(stack, MAX_ROOMS)) {
+        stack->array[++stack->top] = room;
+    }
+}
+
+// Function to pop an element from the stack
+int pop(struct Stack* stack) {
+    if (!isEmpty(stack)) {
+        return stack->array[stack->top--];
+    }
+    return -1; // Return a special value indicating an empty stack
+}
+
+// Function to convert a decimal number to binary
+void decimalToBinary(int decimal) {
+    struct Stack* binaryStack = createStack(MAX_ROOMS);
+    int tempDecimal = decimal;
+
+    // Convert decimal to binary and push each bit onto the stack
+    while (tempDecimal > 0) {
+        push(binaryStack, tempDecimal % 2);
+        tempDecimal /= 2;
+    }
+
+    // Pop bits from the stack and print to get the binary representation
+    printf("Binary Representation: ");
+    while (!isEmpty(binaryStack)) {
+        printf("%d", pop(binaryStack));
+    }
+    printf("\n");
+}
+
+// Function to simulate moving through rooms and unlocking the treasure
+void simulateScenario(int decimalInRoom5) {
+    printf("Decimal number in Room 5: %d\n", decimalInRoom5);
+
+    // Convert decimal to binary and print
+    decimalToBinary(decimalInRoom5);
+
+    struct Stack* roomStack = createStack(MAX_ROOMS);
+
+    // Move forward through rooms 1 to 5
+    for (int i = 1; i <= MAX_ROOMS; ++i) {
+        printf("Entering Room %d\n", i);
+        push(roomStack, i);
+    }
+
+    // Move backward through rooms 5 to 1
+    while (!isEmpty(roomStack)) {
+        int currentRoom = pop(roomStack);
+        printf("Exiting Room %d\n", currentRoom);
+    }
+
+    printf("Treasure Unlocked!\n");
+}
+
+int main() {
+    // Replace the value below with the decimal number in Room 5
+    int decimalInRoom5 = 23;
+
+    // Simulate the scenario
+    simulateScenario(decimalInRoom5);
+
+    return 0;
+}
