@@ -1,0 +1,97 @@
+//Thread BT inorder 
+WriteaProgramtocreateInorderThreadedBinaryTreeandTraverseitin
+Preorderway 
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for the threaded binary tree
+struct Node {
+    int data;
+    struct Node *left, *right;
+    int isThreaded; // Flag to indicate whether right pointer is a thread or a normal pointer
+};
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->left = newNode->right = NULL;
+    newNode->isThreaded = 0;
+    return newNode;
+}
+
+// Function to perform inorder threading of the binary tree
+void createThreadedBinaryTree(struct Node* root, struct Node** prev) {
+    if (root) {
+        // Recursively convert the left subtree
+        createThreadedBinaryTree(root->left, prev);
+
+        // If the left child is NULL, thread it to the previous node
+        if (*prev != NULL) {
+            (*prev)->right = root;
+            (*prev)->isThreaded = 1;
+        }
+
+        // Update the previous node
+        *prev = root;
+
+        // Recursively convert the right subtree
+        createThreadedBinaryTree(root->right, prev);
+    }
+}
+
+// Function to traverse the threaded binary tree in preorder
+void traversePreorder(struct Node* root) {
+    while (root != NULL) {
+        // Print the current node's data
+        printf("%d ", root->data);
+
+        // If the right child is a thread, move to the inorder successor
+        if (root->isThreaded) {
+            root = root->right;
+        } else {
+            // Otherwise, move to the left child
+            root = root->left;
+        }
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+    struct Node* prev = NULL;
+
+    // Taking user input to build the binary tree
+    int n;
+    printf("Enter the number of nodes in the binary tree: ");
+    scanf("%d", &n);
+
+    printf("Enter the values of the nodes:\n");
+    for (int i = 0; i < n; i++) {
+        int value;
+        scanf("%d", &value);
+        if (root == NULL) {
+            root = createNode(value);
+            prev = root;
+        } else {
+            struct Node* newNode = createNode(value);
+            if (value < prev->data) {
+                prev->left = newNode;
+            } else {
+                prev->right = newNode;
+            }
+            prev = newNode;
+        }
+    }
+
+    // Create the threaded binary tree
+    createThreadedBinaryTree(root, &prev);
+
+    // Traverse the threaded binary tree in preorder
+    printf("Preorder traversal of the threaded binary tree: ");
+    traversePreorder(root);
+    printf("\n");
+
+    return 0;
+}
