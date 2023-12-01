@@ -1,0 +1,99 @@
+//Write a Program to create a Binary Tree and  print Mirror image, Height, Leaf node display, Level wise display etc.
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node {
+    int data;
+    struct node* L;
+    struct node* R;
+};
+
+struct node* createNode(int value) {
+    struct node* newNode = malloc(sizeof(struct node));
+    newNode->data = value;
+    newNode->L = NULL;
+    newNode->R = NULL;
+    return newNode;
+}
+
+void levelwiseDisplay(struct node* root) {
+    if (root == NULL) {
+        printf("Tree is empty.\n");
+        return;
+    }
+
+    struct node* queue[100]; // Assuming the maximum number of nodes in the tree is 100
+    int front = -1, rear = -1;
+    queue[++rear] = root;
+
+    printf("Level-wise Display: ");
+    while (front != rear) {
+        struct node* newNode = queue[++front];
+        printf("%d ", newNode->data);
+
+        if (newNode->L)
+            queue[++rear] = newNode->L;
+        if (newNode->R)
+            queue[++rear] = newNode->R;
+    }
+    printf("\n");
+}
+
+void mirror_image(struct node* root) {
+    if (root != NULL) {
+        struct node* temp = root->L;
+        root->L = root->R;
+        root->R = temp;
+        mirror_image(root->L);
+        mirror_image(root->R);
+    }
+}
+
+int height(struct node* root) {
+    if (root == NULL)
+        return 0;
+    else {
+        int leftHeight = height(root->L);
+        int rightHeight = height(root->R);
+
+        if (leftHeight > rightHeight)
+            return leftHeight + 1;
+        else
+            return rightHeight + 1;
+    }
+}
+
+void printLeafNodes(struct node* root) {
+    if (root == NULL)
+        return;
+
+    if (root->L == NULL && root->R == NULL)
+        printf("%d ", root->data);
+
+    printLeafNodes(root->L);
+    printLeafNodes(root->R);
+}
+
+int main() {
+    struct node* root = createNode(1);
+    root->L = createNode(2);
+    root->R = createNode(3);
+    root->L->L = createNode(4);
+    root->L->R = createNode(5);
+    root->R->L = createNode(6);
+    root->R->R = createNode(7);
+
+    //levelwiseDisplay(root);
+
+    printf("Height of the tree: %d\n", height(root));
+
+    printf("Leaf nodes: ");
+    printLeafNodes(root);
+    printf("\n");
+
+    printf("Mirror Image: \n");
+    mirror_image(root);
+    levelwiseDisplay(root);
+
+    return 0;
+}
