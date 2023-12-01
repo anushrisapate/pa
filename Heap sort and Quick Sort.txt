@@ -156,6 +156,24 @@ void quickSort(struct Student arr[], int low, int high, int *swapCount) {
     }
 }
 
+input
+
+Enter the number of students: 3
+Enter student details:
+Student 1:
+Name: Alice
+Roll No: 101
+Total Marks: 85
+Student 2:
+Name: Bob
+Roll No: 103
+Total Marks: 92
+Student 3:
+Name: Charlie
+Roll No: 102
+Total Marks: 78
+
+
 
 
 
